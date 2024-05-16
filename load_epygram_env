@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+module purge
+deactivate
+
+export PATH="$HOME/.local/bin:$PATH"
+module load prgenv/intel
+module use /perm/hlam/apps/modulefiles/lmod
+module load ecmwf-toolbox
+module load epygram/1.4.13
+#module load python3
+#echo epygram/1.4.13 and python is loaded!
+
+
