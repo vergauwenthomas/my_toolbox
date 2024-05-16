@@ -3,16 +3,24 @@
 import argparse
 import os
 import epygram
-
 def run_epygram_what(filepath):
-    assert os.path.isfile(fa_file), f'{args.file} not found.'
+    
+    filepath = construct_filepath(filepath)
+
+    assert os.path.isfile(filepath), f'{filepath} not found.'
     
     epygram.init_env()
 
-    data = epygram.formats.resource(fa_file, 'r')
+    data = epygram.formats.resource(filepath, 'r')
     data.what() #Print all info
     
-
+def construct_filepath(file_arg):
+    """ Checks if the file is relative defined and if so add the pwd. """
+    if str('/') not in file_arg:
+        #relative path
+        return os.path.join(os.getcwd(), file_arg)
+    else:
+        return file_arg
 
 
 
