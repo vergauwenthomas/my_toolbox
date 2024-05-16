@@ -3,6 +3,9 @@
 import argparse
 import os
 import epygram
+
+from epy_modules.io_methods import construct_filepath
+
 def run_epygram_what(filepath):
     
     filepath = construct_filepath(filepath)
@@ -13,14 +16,7 @@ def run_epygram_what(filepath):
 
     data = epygram.formats.resource(filepath, 'r')
     data.what() #Print all info
-    
-def construct_filepath(file_arg):
-    """ Checks if the file is relative defined and if so add the pwd. """
-    if str('/') not in file_arg:
-        #relative path
-        return os.path.join(os.getcwd(), file_arg)
-    else:
-        return file_arg
+
 
 
 
