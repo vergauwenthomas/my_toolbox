@@ -9,6 +9,7 @@ import datetime
 import pandas as pd
 import os
 import yaml
+from subprocess import Popen, PIPE, CalledProcessError
 from pathlib import Path
 
 
@@ -45,7 +46,7 @@ def run_bash_in_python(cmd_list):
 
 def get_secrets():
     """ Read the secrets yaml file and return a dict of secrets."""
-    secretsfile = os.path.join(bashtools, 'secrets.yml')
+    secretsfile = os.path.join(toolbox_dir, 'bashtools', 'secrets.yml')
 
     with open(secretsfile) as stream:
         try:
@@ -61,7 +62,8 @@ def get_secrets():
 def creat_teleport_tunnel():
     """ Setup the teleport login, using the secrets file. """
     #lauch a bash script
-    run_bash_in_python(['source', 'bashtools/auth_to_atos.sh']) #Setup teleport
+    auth_script = os.path.join(toolbox_dir, 'bashtools', 'auth_to_atos.sh')
+    run_bash_in_python(['bash' , auth_script]) #Setup teleport
 
     return
 
@@ -75,13 +77,13 @@ def transfer_file(filepath, target_path, atos_login='aa-login'):
            f'{filepath}',
            f'{secrets["ecmwf_username"]}@{atos_login}:{target_path}']
 
-   run_bash_in_python(cmd)
-   return
+    run_bash_in_python(cmd)
+    return
 
 
 #%% testing
-print('creating tunnel')
-creat_teleport_tunnel()
+#print('creating tunnel')
+#creat_teleport_tunnel()
 
 print('done with tunnel')
 file = "/home/thoverga/fileserver/home/error"
