@@ -1,0 +1,10 @@
+how to rsync to atos?
+
+1.A setup the tunnel
+see the  teleport notes (run teleport-login)
+
+1. start the tsh jump
+tsh login --proxy=jump.ecmwf.int
+
+2. rsync -av path_to_file cu1c@aa-login:/ec/res4/hpcperm/cu1c
+
