@@ -81,20 +81,6 @@ def transfer_file(filepath, target_path, atos_login='aa-login'):
     return
 
 
-#%% testing
-#print('creating tunnel')
-#creat_teleport_tunnel()
-
-print('done with tunnel')
-file = "/home/thoverga/fileserver/home/error"
-target = "/home/cu1c/."
-
-transfer_file(file, target)
-
-
-print('file transferd')
-#%%
-
 
 
 # =============================================================================
@@ -141,6 +127,43 @@ def construct_datetime_telecom_map(startstr, endstr,
         dt_to_telecom_map[dt] = path
 
     return dt_to_telecom_map
+
+
+
+# =============================================================================
+# ATOS-sided
+# =============================================================================
+def _get_atos_telecom_basedir(dirname='telecom'):
+    secrets = get_secrets()
+    atos_telecom_basedir = f'/ec/res4/hpcperm/{secrets["ecmwf_username"]}/telecom'
+    return atos_telecom_basedir
+
+
+def _construct_atos_path_for_telecomfile(timestamp, kili_path, atos_telecom_basedir):
+
+    filename = kili_path.split('/')[-1]
+    target_file = os.path.join(atos_telecom_basedir,
+                        f'{timestamp.year}', #year
+                        f'{str(timestamp.month).zfill(2)}', #month
+                        f'{str(timestamp.day).zfill(2)}', #month
+                        filename)
+    return target_file
+
+
+
+
+
+
+#%% testing
+
+atos_basedir_for_telecoms = _get_atos_telecome_basedir()
+transferlist = construct_datetime_telecom_map(start,
+                                      end)
+
+for dt, kili_file in transferlist.items():
+    trg_file = _construct_atos_path_for_telecomfile(dt, kili_file))
+
+    transfer_file(kili_file, trg_file)
 
 
 
