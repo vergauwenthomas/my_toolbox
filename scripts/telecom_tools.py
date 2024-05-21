@@ -8,10 +8,16 @@ Created on Fri May 17 13:37:38 2024
 import datetime
 import pandas as pd
 import os
+from pathlib import Path
 
+toolbox_dir = Path(__file__).resolve().parents[1]
 telecom_base_dir = '/mnt/HDS_ALADIN/ALADIN/telecom'
+
+
+
+
 start="2020-08-02T02:00:00Z"
-end = "2020-08-06T018:00:00Z"
+end = "2020-08-02T03:00:00Z"
 
 # =============================================================================
 #
@@ -61,7 +67,6 @@ def construct_datetime_telecom_map(startstr, endstr,
 
 test=construct_datetime_telecom_map(startstr=start,
                                     endstr=end)
-
 
 
 
