@@ -19,8 +19,8 @@ telecom_base_dir = '/mnt/HDS_ALADIN/ALADIN/telecom'
 
 
 
-start="2020-08-02T02:00:00Z"
-end = "2020-08-02T03:00:00Z"
+start="2020-08-03T02:00:00Z"
+end = "2020-08-03T03:00:00Z"
 
 
 # =============================================================================
@@ -73,7 +73,10 @@ def transfer_file(filepath, target_path, atos_login='aa-login'):
     secrets = get_secrets()
 
     cmd = ['rsync',
-           '-avu',
+           '-a',
+           '-r',
+           '-v',
+           '-u',
            f'{filepath}',
            f'{secrets["ecmwf_username"]}@{atos_login}:{target_path}']
 
@@ -133,7 +136,7 @@ def construct_datetime_telecom_map(startstr, endstr,
 # =============================================================================
 # ATOS-sided
 # =============================================================================
-def _get_atos_telecom_basedir(dirname='telecom'):
+def _get_atos_telecom_achive_dir(dirname='telecom_archive'):
     secrets = get_secrets()
     atos_telecom_basedir = f'/ec/res4/hpcperm/{secrets["ecmwf_username"]}/telecom'
     return atos_telecom_basedir
@@ -142,27 +145,23 @@ def _get_atos_telecom_basedir(dirname='telecom'):
 def _construct_atos_path_for_telecomfile(timestamp, kili_path, atos_telecom_basedir):
 
     filename = kili_path.split('/')[-1]
-    target_file = os.path.join(atos_telecom_basedir,
-                        f'{timestamp.year}', #year
-                        f'{str(timestamp.month).zfill(2)}', #month
-                        f'{str(timestamp.day).zfill(2)}', #month
-                        filename)
+    target_file = os.path.join(atos_telecom_basedir, filename)
     return target_file
-
-
 
 
 
 
 #%% testing
 
-atos_basedir_for_telecoms = _get_atos_telecome_basedir()
+atos_basedir_for_telecoms = _get_atos_telecom_archive_dir()
 transferlist = construct_datetime_telecom_map(start,
-                                      end)
+                                      end,
+                                      telecom_file_postfix='.tar.xz')
 
 for dt, kili_file in transferlist.items():
-    trg_file = _construct_atos_path_for_telecomfile(dt, kili_file))
-
+    print(kili_file)
+    trg_file = _construct_atos_path_for_telecomfile(dt, kili_file, atos_basedir_for_telecoms)
+    print(trg_file)
     transfer_file(kili_file, trg_file)
 
 
