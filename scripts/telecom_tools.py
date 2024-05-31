@@ -55,6 +55,9 @@ def get_secrets():
             print(exc)
     return secrets
 
+def _get_ecmwf_user():
+    return get_secrets()['ecmwf_username']
+
 # =============================================================================
 # TUNNEL: KILI --> ATOS
 # =============================================================================
@@ -78,7 +81,7 @@ def transfer_file(filepath, target_path, atos_login='aa-login'):
            '-v',
            '-u',
            f'{filepath}',
-           f'{secrets["ecmwf_username"]}@{atos_login}:{target_path}']
+           f'{_get_ecmwf_user()}@{atos_login}:{target_path}']
 
     run_bash_in_python(cmd)
     return
@@ -136,17 +139,29 @@ def construct_datetime_telecom_map(startstr, endstr,
 # =============================================================================
 # ATOS-sided
 # =============================================================================
-def _get_atos_telecom_achive_dir(dirname='telecom_archive'):
+def _get_atos_telecom_achive_dir(archive_dir_name='telecom_archive'):
+    """ Construct the path to the telecom archive dir on atos"""
     secrets = get_secrets()
-    atos_telecom_basedir = f'/ec/res4/hpcperm/{secrets["ecmwf_username"]}/telecom'
+    atos_telecom_basedir = f'/ec/res4/hpcperm/{_get_ecmwf_user()}/{archive_dir_name}'
     return atos_telecom_basedir
 
 
-def _construct_atos_path_for_telecomfile(timestamp, kili_path, atos_telecom_basedir):
-
+def _construct_atos_path_for_telecomfile(kili_path, atos_telecom_basedir):
+    """ Construct the path of the target zipped telecom file on atos """
     filename = kili_path.split('/')[-1]
     target_file = os.path.join(atos_telecom_basedir, filename)
     return target_file
+
+
+
+
+def unpack_telecom(telecom_zip_path, target_dt, telecom_base_dir='telecom'):
+
+    # 1. Form telecome basedir path
+    tel_dir = os.path.join(['ec', 'res4', 'hpcperm',_get_ecmwf_user(), f'{telecom_base_dir}'])
+
+    #2. Construct parent folders for target path
+    target_path_
 
 
 
