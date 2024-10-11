@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "toolbox"
+version = "0.1.0"
+description = "My personal toolbox for NWP stuff"
+authors = ["Thomas Vergauwen <thomas.vergauwen@meteo.be>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+nested-diff = "^1.6.0"
+colorama = "^0.4.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
