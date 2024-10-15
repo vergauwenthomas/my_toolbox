@@ -7,7 +7,9 @@ Created on Fri Oct 11 17:41:54 2024
 """
 import sys
 import nested_diff
-from termcolor import colored
+
+
+from .string_formatters import _fmt_str
 
 
 # =============================================================================
@@ -20,7 +22,9 @@ column_char = '''|'''
 # Main
 # =============================================================================
 
-def _print_diff(namelist_a, namelist_b, diffdict, max_print_length=120):
+def _print_diff(namelist_a, namelist_b, diffdict, max_print_length=120, 
+                html_formatted=False):
+    
     
     #Print header
     colsize = int((max_print_length-1)/2)
@@ -30,16 +34,39 @@ def _print_diff(namelist_a, namelist_b, diffdict, max_print_length=120):
     
     header=f'{lstr}{column_char}{rstr}\n {"-"*max_print_length}\n'
     
-    print(header)
+    groupstr=''
+    
+    if html_formatted:
+        output_format='html'
+        diffvalue_col ='red'
+        missing_in_other_col='blue'
+    else:
+        output_format='terminal'
+        diffvalue_col ='red'
+        missing_in_other_col='cyan'
+        
     
     for Groupname, groupdiff in diffdict['D'].items():
-        _printgroup(namleft=namelist_a,
-                    namright=namelist_b,
-                    Groupname=Groupname,
-                    groupdiff = groupdiff,
-                    max_print_length=max_print_length,
-                    diffvalue_color='red',
-                    missing_in_other='cyan')
+        groupstr +=  _printgroup(namleft=namelist_a,
+                                namright=namelist_b,
+                                Groupname=Groupname,
+                                groupdiff = groupdiff,
+                                max_print_length=max_print_length,
+                                diffvalue_color=diffvalue_col,
+                                missing_in_other=missing_in_other_col,
+                                output_format=output_format)
+        
+    if html_formatted:
+        html_lines=[]
+        html_lines.append(f'<p><b>{header}</b>') #write header in bold
+        for line in groupstr.split('\n'): #iterate over every line
+            html_lines.append(f'<pre>' + line + '<br /></pre>' + '\n')
+        
+        html_lines.append('</p>')
+        return html_lines
+    else:
+        
+        return header + groupstr
           
 def _compute_deepdiff(namelist_a, namelist_b):
     return nested_diff.diff(namelist_a.namelist, namelist_b.namelist)
@@ -52,11 +79,11 @@ def _compute_deepdiff(namelist_a, namelist_b):
 
 
 
-
 def _printgroup(namleft, namright, Groupname, groupdiff, max_print_length=120,
-                diffvalue_color='red', missing_in_other='cyan',
+                diffvalue_color='red', missing_in_other='cyan', output_format='terminal'
                 ):
     
+    groupstr = ""
     colsize = int((max_print_length-1)/2)
     #print groupname left
     if Groupname in namleft.namelist.keys():
@@ -75,7 +102,10 @@ def _printgroup(namleft, namright, Groupname, groupdiff, max_print_length=120,
         rgroupname=''
         
     #print line
-    print(_fmt_str(lgroupname, lgroupcolor),column_char, _fmt_str(rgroupname, rgroupcolor) )
+    groupstr += ( _fmt_str(text=lgroupname, textcolor=lgroupcolor, output=output_format) +
+                 column_char +
+                 _fmt_str(text=rgroupname, textcolor=rgroupcolor, output=output_format) +
+                 '\n')
    
     
     # go trough the values
@@ -83,23 +113,28 @@ def _printgroup(namleft, namright, Groupname, groupdiff, max_print_length=120,
         if difftype == 'U':
             #All group settings are unchanged!
             if setdif == {}:
-                print(_fmt_str(text=setdif, N_ident=1), column_char, _fmt_str(text=setdif, N_ident=1))
-                # print(f'{pindent + str(setdif)}'.ljust(colsize),'|', f'{pindent + str(setdif)}'.ljust(colsize))
+                groupstr += (_fmt_str(text=setdif, N_ident=1, output=output_format) +
+                             column_char +
+                             _fmt_str(text=setdif, N_ident=1, output=output_format) +
+                             '\n')
             else:
                 for lsetname in setdif.keys():
                     value = setdif[lsetname]
                     if isinstance(value, list):
                         value = value #TODO 
                     #print setting names
-                    print(_fmt_str(text=f'{lsetname}: {value}', N_ident=1), column_char, _fmt_str(text=f'{lsetname}: {value}', N_ident=1))
+                    groupstr += (_fmt_str(text=f'{lsetname}: {value}', N_ident=1,output=output_format) +
+                                 column_char +
+                                 _fmt_str(text=f'{lsetname}: {value}', N_ident=1, output=output_format) + 
+                                 '\n')
                    
-            
-        
         elif difftype == 'R':
             #all group values do not exist in right
             if setdif == {}:
-                print(_fmt_str(text=setdif, N_ident=1, textcolor=missing_in_other), column_char, _fmt_str(text=""))
-                
+                groupstr += (_fmt_str(text=setdif, N_ident=1, textcolor=missing_in_other, output=output_format) +
+                             column_char +
+                             _fmt_str(text="", output=output_format) +
+                             '\n')
             else:
                 for lsetname in setdif.keys():
                     value = setdif[lsetname]
@@ -107,14 +142,18 @@ def _printgroup(namleft, namright, Groupname, groupdiff, max_print_length=120,
                         value = value #TODO 
                     
                     #print setting names
-                    print(_fmt_str(text=f'{lsetname}: {value}', N_ident=1, textcolor=missing_in_other), column_char, _fmt_str(text="", N_ident=1))
-                    # print(colored(f'{pindent + lsetname}: {value}'.ljust(colsize), missing_in_other), '|')
-        
+                    groupstr += (_fmt_str(text=f'{lsetname}: {value}', N_ident=1, textcolor=missing_in_other, output=output_format) +
+                                 column_char+ 
+                                 _fmt_str(text="", N_ident=1, output=output_format) +
+                                 '\n')
+                  
         elif difftype == 'A':
             #all group values do not exist in left
             if setdif == {}:
-                print(_fmt_str(text=""), column_char,_fmt_str(text=setdif, N_ident=1, textcolor=missing_in_other))
-                # print(''.ljust(colsize), '|', colored(f'{pindent + str(setdif)}'.ljust(colsize), missing_in_other))
+                groupstr += ( _fmt_str(text="", output=output_format) +
+                             column_char+
+                             _fmt_str(text=setdif, N_ident=1, textcolor=missing_in_other, output=output_format) +
+                             '\n')
             else:
                 for rsetname in setdif.keys():
                     value = setdif[rsetname]
@@ -122,9 +161,11 @@ def _printgroup(namleft, namright, Groupname, groupdiff, max_print_length=120,
                         value = value #TODO 
                     
                     #print setting names
-                    print( _fmt_str(text="", N_ident=1), column_char, _fmt_str(text=f'{rsetname}: {value}', N_ident=1, textcolor=missing_in_other))
-                    # print(''.ljust(colsize), '|', colored(f'{pindent + rsetname}: {value}'.ljust(colsize), missing_in_other))
-        
+                    groupstr += (_fmt_str(text="", N_ident=1, output=output_format)+
+                                 column_char +
+                                 _fmt_str(text=f'{rsetname}: {value}', N_ident=1, textcolor=missing_in_other, output=output_format) + 
+                                 '\n')
+                    
         elif difftype == 'D':
             #(some) values are different
             for setname in setdif.keys():
@@ -132,9 +173,10 @@ def _printgroup(namleft, namright, Groupname, groupdiff, max_print_length=120,
                     ltext = f"{setname}: {setdif[setname]['U']}"
                     rtext = f"{setname}: {setdif[setname]['U']}"
                     
-                    print(_fmt_str(text=ltext, N_ident=1),
-                          column_char,
-                          _fmt_str(text=rtext, N_ident=1))
+                    groupstr +=(_fmt_str(text=ltext, N_ident=1, output=output_format)+
+                          column_char +
+                          _fmt_str(text=rtext, N_ident=1, output=output_format) + 
+                          '\n')
                     
              
                 elif 'R' in setdif[setname].keys():
@@ -142,25 +184,28 @@ def _printgroup(namleft, namright, Groupname, groupdiff, max_print_length=120,
                     ltext = f"{setname}: {setdif[setname]['R']}"
                     rtext = ''
                     
-                    print(_fmt_str(text=ltext, N_ident=1, textcolor=missing_in_other),
-                          column_char,
-                          _fmt_str(text=rtext, N_ident=1))
+                    groupstr += (_fmt_str(text=ltext, N_ident=1, textcolor=missing_in_other, output=output_format) +
+                          column_char +
+                          _fmt_str(text=rtext, N_ident=1, output=output_format) + 
+                          '\n')
                     
                 elif 'A' in setdif[setname].keys():
                     ltext=''
                     rtext = f"{setname}: {setdif[setname]['A']}"
-                    print(_fmt_str(text=ltext, N_ident=1),
-                          column_char,
-                          _fmt_str(text=rtext, N_ident=1, textcolor=missing_in_other))
+                    groupstr += (_fmt_str(text=ltext, N_ident=1, output=output_format)+
+                          column_char+
+                          _fmt_str(text=rtext, N_ident=1, textcolor=missing_in_other, output=output_format) + 
+                          '\n')
               
                 elif 'N' in setdif[setname]:
                     # #values are different
                     lvalue =  setdif[setname]['O']
                     rvalue = setdif[setname]['N']
                 
-                    print(_fmt_str(text=f'{setname}: {lvalue}', N_ident=1, textcolor=diffvalue_color),
-                          column_char,
-                          _fmt_str(text=f'{setname}: {rvalue}', N_ident=1, textcolor=diffvalue_color))
+                    groupstr += (_fmt_str(text=f'{setname}: {lvalue}', N_ident=1, textcolor=diffvalue_color, output=output_format) +
+                          column_char +
+                          _fmt_str(text=f'{setname}: {rvalue}', N_ident=1, textcolor=diffvalue_color, output=output_format) + 
+                          '\n')
                     pass
                 else:
                     sys.exit(f'Not forseen difftype : {setname} in {setdif}')
@@ -169,54 +214,8 @@ def _printgroup(namleft, namright, Groupname, groupdiff, max_print_length=120,
         else:
             sys.exit(f'Not forseen difftype : {difftype}')
 
+    return groupstr
 
 
 
-
-            
-            
-# =============================================================================
-# Formatters
-# =============================================================================
-       
-
-def _fmt_str(text, textcolor=None, N_ident=0, max_print_length=120, ident='    '):
-    """ format how text is printed for one hand side. """
-    colsize = int((max_print_length-1)/2)
-    displ_str = f'{str(ident)*N_ident}{text}'
     
-    #check colsize is exceeded (typically by lists)
-    if len(displ_str) > colsize:
-        if text.count(',') > 0: #assume comma only used in str representation of lists
-           displ_str = _fmt_list_text(displ_str,
-                                      colsize-2)
-        else:
-            displ_str = f'{displ_str[:(colsize-3)]}...'
-    displ_str = displ_str.ljust(colsize)
-    return colored(displ_str, textcolor)
-
-
-
-
-def _fmt_list_text(text, colsize, overflow_indent=2):
-    """ Format a string representing a list over multiple lines. """
-    chunks = text.split(',')
-    chunked_text = ''
-    row_bucket=''
-    for chunk in chunks:
-        #check if a single chunk is valid
-        if len(chunk) > colsize:
-            chunk = f'{chunk[:(colsize-(4 + len(overflow_indent)))]}...,'
-        
-        test_row_bucket = f'{row_bucket},{chunk}'
-        if ((len(row_bucket) <= colsize) &
-            (len(test_row_bucket) > colsize)):
-            #flush bucket
-            chunked_text += row_bucket + '\n' + ' '*overflow_indent
-            row_bucket = ''
-        
-        row_bucket += chunk+',' 
-    
-    #add the last row bucket
-    chunked_text += row_bucket
-    return chunked_text

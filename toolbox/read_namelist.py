@@ -6,7 +6,9 @@ Created on Fri Oct 11 17:34:53 2024
 @author: thoverga
 """
 import sys
+import logging
 
+logger = logging.getLogger(__name__)
 
 def read_namelistfile_to_dict(file):
     #Read raw namelist file into a list of strings for each line
@@ -35,16 +37,16 @@ def read_namelistfile_to_dict(file):
     n_lines = len(filerawlist)
     
     for index in range(n_lines):
-        print(f'checking line {index}')
+        logger.debug(f'checking line {index}')
         if index in skiplist:
             continue
     
         line = filerawlist[index]
-        print(f'mapping line: {line}')
+        logger.debug(f'mapping line: {line}')
     
         
         if is_line_empty(line):
-            print(f'skip empyt line {line}')
+            logger.debug(f'skip empyt line {line}')
             skiplist.append(index)
             continue
         
@@ -52,7 +54,7 @@ def read_namelistfile_to_dict(file):
         #check if the line is a groupkey
         if line.startswith('&'):
             groupname = line.replace('&', '')
-            print(f'groupname: {groupname}')
+            logger.debug(f'groupname: {groupname}')
             namedict[groupname] = {}
             #assing line
             skiplist.append(index)
@@ -60,10 +62,10 @@ def read_namelistfile_to_dict(file):
             #read next line and look for settings
             for subidx in range(index+1,n_lines):
                 subline = filerawlist[subidx]
-                print('read subline: ', subline)
+                logger.debug('read subline: ', subline)
                 
                 if is_line_empty(subline):
-                    print(f'  skip empyt subline {subline}')
+                    logger.debug(f'  skip empyt subline {subline}')
                     skiplist.append(subidx)
                     continue
                 #if new group detected, break the loop
@@ -75,7 +77,7 @@ def read_namelistfile_to_dict(file):
                     #setting name detecte
                     
                     settingname = subline.split('=')[0]
-                    print(f'setting found: {settingname}')
+                    logger.debug(f'setting found: {settingname}')
                     
                     
                     
@@ -90,7 +92,7 @@ def read_namelistfile_to_dict(file):
                         skiplist.append(subidx)
                         
                         namedict[groupname][settingname] = value
-                        print(f'found pair: {settingname} : {value}')
+                        logger.debug(f'found pair: {settingname} : {value}')
                         continue
                         
                     #situation 2: multiple values (list) for one setting ON ONE LINE only
@@ -107,7 +109,7 @@ def read_namelistfile_to_dict(file):
                         skiplist.append(subidx)
                         
                         namedict[groupname][settingname] = values
-                        print(f'found situation2: {settingname} : {values}')
+                        logger.debug(f'found situation2: {settingname} : {values}')
                         continue
                     
                     #situation 3: multiple values (list) one multiple lines
@@ -189,7 +191,7 @@ def format_single_setting_per_row(rows):
         
         if line.count('=') >1:
             if (line.count('=') == line.count(',')):
-                print(f'Format into multiple lines: {line}')
+                logger.debug(f'Format into multiple lines: {line}')
                 lines = line.split(',')
                 lines = [f'{subline},' for subline in lines if bool(subline)]
                 
@@ -221,7 +223,7 @@ def format_add_comma_to_end_of_line(rows):
         if ((not ('&' in line)) & 
             (not (line.endswith(','))) &
             (not (is_line_empty(line)))):
-            print(f'Add a comma to line: {line}')
+            logger.debug(f'Add a comma to line: {line}')
             rows[idx] = f'{line},'
         idx+=1
     return rows
@@ -242,7 +244,7 @@ def format_indented_values(rows):
         line = rows[idx]
         
         if line.endswith('='):
-            print(f'Insert this line in front of the next occuring: {line}')
+            logger.debug(f'Insert this line in front of the next occuring: {line}')
             
             #delete errornous line
             del rows[idx]
@@ -251,7 +253,7 @@ def format_indented_values(rows):
             
             nrows -= 1
         elif line.endswith('=,'):
-            print(f'Insert this line in front of the next occuring: {line}')
+            logger.debug(f'Insert this line in front of the next occuring: {line}')
             
             #delete errornous line
             del rows[idx]
