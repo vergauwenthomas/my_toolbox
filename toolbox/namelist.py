@@ -45,19 +45,39 @@ class Namelist(object):
         self.namelist = namedict
         
         
-    def explain(self, tags="ALL", max_text_length=120):
+    def explain(self, tags="ALL", write_html=None, max_text_length=120):
         #TODO: Implement TAG filter
         column_char = '''   -->  '''
         
-        defdict = get_defenitions()
+        #Setup html target path
+        if write_html is None:
+            output_format='terminal'
+        else:
+            output_format='html'
+            #test if string is a path to a file
+            if os.path.exists(write_html):
+                trg_html = write_html
+                #remove file
+                os.remove(write_html)
+            else:
+                #assume writ_html is a filename to create in the current workdir
+                if str(write_html).endswith('.html'):
+                    trg_html = os.path.join(os.getcwd(), write_html)
+                else:
+                    trg_html = os.path.join(os.getcwd(), f'{write_html}.html')
         
+        #read the defenitions
+        defdict = get_defenitions()
+            
         colsize = int((max_text_length-1)/2)
             
+        # write header
         lstr = str(self.name.upper().center(colsize))
-        rstr = f"Explanation with tags={tags}"
-        
+        rstr = f"Explanation with tags={tags}"        
         header=f'{lstr}{column_char}{rstr}\n {"-"*max_text_length}\n'
-        
+
+
+        # Write lines 
         groupstr = ""
         for groupname, val in self.namelist.items():
             if groupname not in defdict.keys():
@@ -69,10 +89,16 @@ class Namelist(object):
                 group_is_known=True
             
             #Get expelenation and info of group
-            groupstr += (_fmt_str(text=f'{groupname}', N_ident=0, fill_column=False) +
-                         column_char +
-                         _fmt_str(text=f'{groupdef}: {groupinfo}', N_ident=0, textcolor='green') + 
-                         '\n')
+            groupstr += _fmt_str(text = f'{groupname} --> [color][green]{groupdef}: {groupinfo}[color]',
+                                 max_print_length=max_text_length,
+                                 output=output_format,
+                                 no_list=True) + '\n'
+            # groupstr += (_fmt_str(text=f'{groupname}', N_ident=0, fill_column=False, output=output_format) +
+            #              column_char +
+            #              _fmt_str(text=f'{groupdef}: {groupinfo}', N_ident=0,
+            #                       textcolor='green', output=output_format,
+            #                       no_list=True) + 
+            #              '\n')
             
             for settingname, setvalue in val.items():
                 if not group_is_known:
@@ -85,12 +111,32 @@ class Namelist(object):
                     settingdef = 'Unknown'
                     settinginfo=''
                 
-                groupstr += (_fmt_str(text=f'{settingname}: {setvalue}', N_ident=1, fill_column=False) +
-                             column_char +
-                             _fmt_str(text=f'{settingdef}: {settinginfo}', N_ident=1, textcolor='green') + 
-                             '\n')
+                groupstr += _fmt_str(text=f'[tab]{settingname}: {setvalue} --> [color][green]{settingdef} : {settinginfo}[color]',
+                                     max_print_length=max_text_length,
+                                     output=output_format,
+                                     no_list=True) + '\n'
+                # groupstr += (_fmt_str(text=f'{settingname}: {setvalue}', N_ident=1, fill_column=False, output=output_format) +
+                #              column_char +
+                #              _fmt_str(text=f'{settingdef} {settinginfo}',
+                #                       N_ident=1, textcolor='green',
+                #                       output=output_format,
+                #                       no_list=True) + 
+                #              '\n')
             
-        
+        if output_format == 'html':
+            #write to html file
+            with open(trg_html, 'w') as f:
+                f.write('<html>')
+                f.write(css_style)
+                f.write(f'<p><b>{header}</b>')
+                for line in groupstr.split('\n'):
+                    f.write(f'<pre>' + line + '<br /></pre>' + '\n')
+                
+                f.write('</p>')
+                f.write('</html>')
+            
+            print(f'Explenation is written to: {trg_html}')
+            return 
         return groupstr
 
         
