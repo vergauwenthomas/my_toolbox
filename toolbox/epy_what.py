@@ -20,24 +20,24 @@ def run_epygram_what(filepath):
 
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(prog='What ??',
-                                     formatter_class=argparse.RawDescriptionHelpFormatter,
-                                     description="""
-What ??: Print out an overview of what is contained by an FA file
--------------------------------------------------------------------
+#     parser = argparse.ArgumentParser(prog='What ??',
+#                                      formatter_class=argparse.RawDescriptionHelpFormatter,
+#                                      description="""
+# What ??: Print out an overview of what is contained by an FA file
+# -------------------------------------------------------------------
 
-There are no special options for this script.
-"""
-)
+# There are no special options for this script.
+# """
+# )
 
-    parser.add_argument("file", help="FA filename, path of FA file or similar regex expression on filenames.", default='')  # argument without prefix
+#     parser.add_argument("file", help="FA filename, path of FA file or similar regex expression on filenames.", default='')  # argument without prefix
 
-    args = parser.parse_args()
+#     args = parser.parse_args()
 
-    # Run the application
-    run_epygram_what(str(args.file))
+#     # Run the application
+#     run_epygram_what(str(args.file))
 
 
 

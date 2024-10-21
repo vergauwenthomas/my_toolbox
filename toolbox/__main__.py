@@ -92,6 +92,10 @@ A toolbox for working with NWP/Climate model output.
                                      )
         
     
+    # =============================================================================
+    # Namelist methods     
+    # =============================================================================
+    
     default_printlength=110
     # arguments that require a fileB as input
     subparsers = parser.add_subparsers(help='sub-commands help')
@@ -125,6 +129,33 @@ A toolbox for working with NWP/Climate model output.
     sp = subparsers.add_parser('Update_defenitions', help='Update the local copy of the namelist defenitions from the online google sheet.')
     sp.set_defaults(cmd = 'update_def')
 
+    
+    # =============================================================================
+    #  FA methods
+    # =============================================================================
+    if tb._with_epygram:
+        #WHAT
+        sp = subparsers.add_parser('what', help='Print out an overview of an FA file.')
+        sp.set_defaults(cmd = 'what')
+        sp.add_argument("file", help="filename, path or similar regex expression of the FA file to explain.", default='')  # argument without prefix
+        
+        #WHAT
+        sp = subparsers.add_parser('plot', help='Make a 2D plot of a field of an FA file.')
+        sp.set_defaults(cmd = 'plot')
+        sp.add_argument("file", help="filename, path or similar regex expression of the FA file to explain.", default='')  # argument without prefix
+        sp.add_argument("fieldname", help="The name of the field to plot.", default='')  # argument without prefix
+        sp.add_argument('-l', '--level', help='The level of the field, if None, the lowest level is plotted',
+                            default=None)
+        sp.add_argument('--backend', help='The plotting backend for cartoplot/mpl (use Qt5 for interactive --> needs Qt5 module)',
+                            default='Qt5')
+        
+
+
+
+    # =============================================================================
+    # General Methods    
+    # =============================================================================
+
 
     args = vars(parser.parse_args())
     if not bool(args):
@@ -144,6 +175,24 @@ A toolbox for working with NWP/Climate model output.
                           
     if args['cmd'] == 'update_def': 
         _update_local_namelist_def()
+        
+    if args['cmd'] == 'what': 
+        tb.run_epygram_what(_get_file(args['file']))
+        
+    if args['cmd'] == 'plot': 
+        #typecast
+        if args.level is not None:
+            level = int(args.level)
+        else:
+            level=None
+        
+        tb.make_regular_2d_plot(file=_get_file(args['file']),
+                             fieldname=str(args['file']),
+                             level=level,
+                             backend=str(args['backend']))
+        
+       
+       
         
         
         
