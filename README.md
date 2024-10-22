@@ -3,7 +3,7 @@ A handyman's toolbox for model output. This is a collection of simple analysis t
 
 The toolbox is feature-based, so the functionallity and dependecies will vary over time.
 
-#How to install 
+# How to install 
 
 Clone this repo, use poetry to install the package and dependencies. If you install the toolbox on a server/hpc, you can write an setup script (see the `setup_env/atos.sh' script as exaple.)
 
@@ -19,6 +19,8 @@ alias toolbox="python3 ${toolboxdir}/toolbox "${@: -1}""
 ```
 
 Update the path to the `toolboxdir` for your setup! 
+
+# Usage
 
 Then, if you want to use the toolbox you start by running `activate_toolbox` an to use is, just call `toolbox`.
 
