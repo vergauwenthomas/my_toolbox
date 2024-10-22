@@ -55,8 +55,28 @@ def _explain_namelist(file, target_html, max_text_length):
     
 def _update_local_namelist_def():
     tb._get_name_def_from_online()
-    
 
+
+# --- PYFA related ----------------    
+
+def _what(file):
+    import pyfa_tool as pyfa #import here, so the toolbox can be runned without pyfa
+    pyfa.FaFile(file).describe()
+
+
+def _d2_plot(file, fieldname, reproj_bool, trg_epsg):
+    import matplotlib.pyplot as plt
+    import pyfa_tool as pyfa
+    ds = pyfa.FaDataset(file, nodata=-999) #Create dataset
+
+    # import the 2d field
+    ds.import_2d_field(fieldname=fieldname,
+                       rm_tmpdir=True,    
+                       reproj=reproj_bool,
+                       target_epsg=trg_epsg,        
+                      )
+    ds.plot(variable=fieldname)
+    plt.show()
 
 # =============================================================================
 # Helpers
@@ -133,21 +153,21 @@ A toolbox for working with NWP/Climate model output.
     # =============================================================================
     #  FA methods
     # =============================================================================
-    if tb._with_epygram:
+    if tb._with_pyfa:
         #WHAT
-        sp = subparsers.add_parser('what', help='Print out an overview of an FA file.')
+        sp = subparsers.add_parser('what', help='Print out an overview of an FA file (using PyFa as backend).')
         sp.set_defaults(cmd = 'what')
         sp.add_argument("file", help="filename, path or similar regex expression of the FA file to explain.", default='')  # argument without prefix
         
-        #WHAT
+        #plot
         sp = subparsers.add_parser('plot', help='Make a 2D plot of a field of an FA file.')
         sp.set_defaults(cmd = 'plot')
         sp.add_argument("file", help="filename, path or similar regex expression of the FA file to explain.", default='')  # argument without prefix
         sp.add_argument("fieldname", help="The name of the field to plot.", default='')  # argument without prefix
-        sp.add_argument('-l', '--level', help='The level of the field, if None, the lowest level is plotted',
-                            default=None)
-        sp.add_argument('--backend', help='The plotting backend for cartoplot/mpl (use Qt5 for interactive --> needs Qt5 module)',
-                            default='Qt5')
+        sp.add_argument('--reproj', help='If this argument is added, the output field is reprojected to trg_crs. ',
+                            default=False, action="store_true")
+        sp.add_argument('--trg_crs', help='The target CRS (in epsg) to reproject to. If "epsg:4326" then landfeatures are added to the plot.',
+                        default='epsg:4326')
         
 
 
@@ -156,8 +176,12 @@ A toolbox for working with NWP/Climate model output.
     # General Methods    
     # =============================================================================
 
-
-    args = vars(parser.parse_args())
+    args, unknown = parser.parse_known_args()
+    
+    print('unknown: ', unknown)
+    args = vars(args)
+    
+    #args = vars(parser.parse_args())
     if not bool(args):
         parser.print_help()
         sys.exit()
@@ -177,19 +201,13 @@ A toolbox for working with NWP/Climate model output.
         _update_local_namelist_def()
         
     if args['cmd'] == 'what': 
-        tb.run_epygram_what(_get_file(args['file']))
+        _what(_get_file(args['file']))
         
     if args['cmd'] == 'plot': 
-        #typecast
-        if args.level is not None:
-            level = int(args.level)
-        else:
-            level=None
-        
-        tb.make_regular_2d_plot(file=_get_file(args['file']),
-                             fieldname=str(args['file']),
-                             level=level,
-                             backend=str(args['backend']))
+        _d2_plot(file=_get_file(args['file']),
+                fieldname=str(args['fieldname']),
+                reproj_bool=bool(args['reproj']),
+                trg_epsg=str(args['trg_crs']))
         
        
        

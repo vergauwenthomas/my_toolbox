@@ -17,21 +17,16 @@ rootlog.setLevel(logging.DEBUG)  # set rootlogger on debug
 from toolbox.namelist import Namelist, print_diff
 from .namelist_interpret.io_namelist_explainer import _get_name_def_from_online
 
-#Epygram stuff
+#Pyfa stuff
 try:
-    from toolbox.epy_what import run_epygram_what
-    from toolbox.epy_plot import make_regular_2d_plot
-    _with_epygram = True
+    import pyfa_tool as pyfa
+    _with_pyfa = True
 except ModuleNotFoundError:
-    rootlog.warning('Toolbox: Epygram is not found, FA-methods are not active.')
-    print('(Toolbox: Epygram is not found, FA-methods are not active ... ) ')
-    _with_epygram= False
+    rootlog.warning('Toolbox: Pyfa is not found, FA-methods are not active.')
+    print('(Toolbox: Pyfa is not found, FA-methods are not active ... ) ')
+    _with_pyfa= False
 
 
 #General stuff
-
-
-
-
 __version__= "0.1.0a"
 rootlog.info(f'toolbox v{__version__}')
