@@ -21,8 +21,8 @@ alias toolbox="python3 ${toolboxdir}/toolbox "${@: -1}""
 Update the path to the `toolboxdir` for your setup! 
 
 # Usage
-
-Then, if you want to use the toolbox you start by running `activate_toolbox` an to use is, just call `toolbox`.
+You can run the toolbox using `poetry run pyhon toolbox` from the root folder of this repo. 
+If you have added the toolbox to your `.bashrc` as described above, use the toolbox you start by running `activate_toolbox` and to use it, just call `toolbox`.
 
 
 ```
