@@ -1,62 +1,71 @@
 # my_toolbox
-A handyman's toolbox for model output on ATOS. This is a collection of simple analysis tools, that are easely accesible by cli. 
-The backend are epygram scripts with an argparser, for which aliases are written in the .bashrc
+A handyman's toolbox for model output. This is a collection of simple analysis tools, that are easely accesible by cli. 
+
+The toolbox is feature-based, so the functionallity and dependecies will vary over time.
+
+#How to install 
+
+Clone this repo, use poetry to install the package and dependencies. If you install the toolbox on a server/hpc, you can write an setup script (see the `setup_env/atos.sh' script as exaple.)
 
 
-## How to use?
-Activate the (epygram) environment by
-
-```
-activate_toolbox
-```
-
-## Tools
-Here a small description of the present tools
-
-### What ??
-This tools prints out the details of the content of an output-file. It take only the file (filename, or filepath) as argument.
+## Add aliasses
+I found it handy to add the toolbox to your bashrc. You can do it by adding this to your `.bashrc`
 
 ```
-what ELSCFDEODALBC005
-```
-Or pipe the output to a log file
+toolboxdir=${HOME}/software/my_toolbox
+alias activate_toolbox="source ${toolboxdir}/setup_env/atos.sh"
+alias toolbox="python3 ${toolboxdir}/toolbox "${@: -1}""
 
 ```
-what ELSCFDEODALBC005 > what_output.log
+
+Update the path to the `toolboxdir` for your setup! 
+
+Then, if you want to use the toolbox you start by running `activate_toolbox` an to use is, just call `toolbox`.
+
+
 ```
+(toolbox-py3.10) [cu1c@aa6-102 ~]$ toolbox -h
+usage: toolbox [-h] {diff,explain,Update_defenitions,what,plot} ...
 
-### plot_me
-This tool makes simple plots of FA outputfiles. Create a plot by runnin `plot_me <filename> <fieldname>'. 
-For more details run the `plot_me -h`.
-
-```
-[cu1c@aa6-100 ~]$ plot_me -h
-usage: plot_me [-h] [-f FIELDNAME] [-l LEVEL] [--backend BACKEND] file
-
-plot_me: a simple plotting tool for FA files using Epygram
+A toolbox for working with NWP/Climate model output.
 --------------------------------------------------------
 
-The following functionality is available:
-    * -f, --fieldname (make as spatial plot of this 2D field.)
-    * -l, --level(print out information of a FA file.)
-    * --backend (Qt5,  agg, ... )
+ Note: The used defenitions are define in this online sheet: https://docs.google.com/spreadsheets/d/1qvwju807GBhnCQ5TOdgdqjIMPUWumCi9dEs1XwYfjvU/edit?usp=sharing
     
 
 positional arguments:
-  file                  FA filename, path of FA file or similar regex expression on filenames.
+  {diff,explain,Update_defenitions,what,plot}
+                        sub-commands help
+    diff                Print out the difference between two namelist.
+    explain             Print out the namelist and explain the settings.
+    Update_defenitions  Update the local copy of the namelist defenitions from the online google sheet.
+    what                Print out an overview of an FA file (using PyFa as backend).
+    plot                Make a 2D plot of a field of an FA file.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -f FIELDNAME, --fieldname FIELDNAME
-                        Make as spatial plot of this 2D field (identifier can contain regex but must point to unique fieldname).
-  -l LEVEL, --level LEVEL
-                        The level of the field, if None, the lowest level is plotted
-  --backend BACKEND     The plotting backend for cartoplot/mpl (use Qt5 for interactive --> needs Qt5 module)
 
-                                                @Thomas Vergauwen (thomas.vergauwen@meteo.be), credits to the Epygram-team. 
-[cu1c@aa6-100 ~]$ 
+toolbox version: 0.1.0a
+
 
 ```
 
+For more details on a specific tool, specify the tool and add `-h` as argument:
+
+```
+
+(toolbox-py3.10) [cu1c@aa6-102 ~]$ toolbox plot -h
+usage: toolbox plot [-h] [--reproj] [--trg_crs TRG_CRS] file fieldname
+
+positional arguments:
+  file               filename, path or similar regex expression of the FA file to explain.
+  fieldname          The name of the field to plot.
+
+options:
+  -h, --help         show this help message and exit
+  --reproj           If this argument is added, the output field is reprojected to trg_crs.
+  --trg_crs TRG_CRS  The target CRS (in epsg) to reproject to. If "epsg:4326" then landfeatures are added to the plot.
+
+```
 
 
