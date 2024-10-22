@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "toolbox"
+version = "0.1.0"
+description = "My personal toolbox for NWP stuff"
+authors = ["Thomas Vergauwen <thomas.vergauwen@meteo.be>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^1" #pandas 1 for PyFa
+matplotlib = "^3"
+nested-diff = "^1.6.0"
+termcolor = "^2"
+
+[tool.poetry.group.pyfa]
+optional = true
+[tool.poetry.group.pyfa.dependencies]
+pyfa-tool = {git = "https://github.com/vergauwenthomas/PyFa.git"}
+matplotlib = "^3"
+
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
