@@ -149,6 +149,12 @@ A toolbox for working with NWP/Climate model output.
     sp = subparsers.add_parser('Update_defenitions', help='Update the local copy of the namelist defenitions from the online google sheet.')
     sp.set_defaults(cmd = 'update_def')
 
+
+    # Check sybolic links
+    sp = subparsers.add_parser('test_for_broken_links', help='Test if all links in the current directory are pointing to an existing file.')
+    sp.set_defaults(cmd = 'test_for_broken_links')
+    
+    
     
     # =============================================================================
     #  FA methods
@@ -178,7 +184,6 @@ A toolbox for working with NWP/Climate model output.
 
     args, unknown = parser.parse_known_args()
     
-    print('unknown: ', unknown)
     args = vars(args)
     
     #args = vars(parser.parse_args())
@@ -208,6 +213,12 @@ A toolbox for working with NWP/Climate model output.
                 fieldname=str(args['fieldname']),
                 reproj_bool=bool(args['reproj']),
                 trg_epsg=str(args['trg_crs']))
+    
+    if args['cmd'] == 'test_for_broken_links':
+        tb.check_dir_for_broken_links(checkdir=os.getcwd())
+        
+        
+        
         
        
        
